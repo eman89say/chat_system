@@ -1,48 +1,46 @@
 <?php
 
+include('../config.php');
+   
+   switch ($_REQUEST['action']) {
+   	case 'sendMessage':
 
- include('../config.php');
+   	         session_start();   
 
-  switch ($_REQUEST['action']) {
-  	case "sendMessage":
+   	         $query = $db->prepare("INSERT INTO messages SET user=?, message=?");
+   	        $run= $query->execute([$_SESSION['username'], $_REQUEST['message']]);
 
-  	session_start();
-  		 
-  		 $query= $db->prepare("INSERT INTO messages SET user=?,message=?");
+   	        if($run){
+   	        	echo 1;
+   	        	exit;
+   	        }
+   		   
+   		break;
 
-  		 $run = $query->execute([$_SESSION['username'],$_REQUEST['message']]);
+   		case 'getMessages':
+               $query = $db->prepare("SELECT * FROM messages");
+   	        $run= $query->execute();
 
-         if($run){
-            echo 1;
-            exit;
-         }
+   	        $rs = $query->fetchAll(PDO::FETCH_OBJ);
 
-  		break;
+   	        $chat = '';
 
+   	        foreach( $rs as $message){
 
+   	        	$chat .= '<div class="single-message">
+   	        	           <strong>'.$message->user .': </strong>'. $message->message.
+   	        	           '<span>'.date('h:i a',strtotime($message->date)).'</span>'.
+   	        	           '</div>';
+   	        }
 
-  		case 'getMessages':
-  		    $query= $db->prepare("SELECT *  FROM messages");
-  	    	 $run = $query->execute();
-
-             $rs=$query->fetchAll(PDO::FETCH_OBJ);
-             $chat='';
-
-             foreach ($rs as  $message){
-              
-
-              $chat.= '<div class="single-message"><strong>'.$message->user. ' :</strong>'. $message->message.'<span>'.date("h:i a
-              	",strtotime($message->date)). '</span></div>';
-                       
+   	        echo $chat;
 
 
-                       
-             }
-             echo $chat;
+   		   break;
+   	
+   	
+   }
 
-  			break;
-  	
-  }
+
 
 ?>
-
